@@ -52,10 +52,10 @@
               "threads": "12",
       },
       "bismark_dedup": {
-              "mem": "100g",
+              "mem": "200g",
               "time": "24:00:00",
               "partition": "norm",
-              "threads": "16",
+              "threads": "12",
       },
       "picard": {
           "gres": "lscratch:256",
