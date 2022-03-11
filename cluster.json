@@ -52,7 +52,7 @@
               "threads": "12",
       },
       "bismark_dedup": {
-              "mem": "20g",
+              "mem": "100g",
               "time": "24:00:00",
               "partition": "norm",
               "threads": "16",
