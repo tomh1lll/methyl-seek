@@ -27,10 +27,10 @@ rawdata_dir= config["rawdata_dir"]
 working_dir= config["result_dir"]
 hg38_fa= config["hg38_fa"]
 phage_fa= config["phage_fa"]
-hg38_gtf= config["hg39_gtf"] ################## New edition
-hg38_rRNA_intervals= config["rRNA_intervals"]  ################## New edition
-hg38_bed_ref= config["bed_ref"]  ################## New edition
-hg39_refFlat= config["hg39_refFlat"] ################## New edition
+hg38_gtf= config["hg38_gtf"]
+hg38_rRNA_intervals= config["hg38_rRNA_intervals"]
+hg38_bed_ref= config["hg38_bed_ref"]
+hg38_refFlat= config["hg38_refFlat"]
 bisulphite_genome_path= config["bisulphite_ref"]
 phage_genome_path= config["phage_ref"]
 bisulphite_fa= config["bisulphite_fa"]
@@ -117,14 +117,14 @@ rule All:
       expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.flagstat"),samples=SAMPLES),
 
       # get alignment statistics
-      expand(join(working_dir,"bismarkAlign/{samples}.RnaSeqMetrics.txt"),samples=SAMPLES),
-      expand(join(working_dir,"bismarkAlign/{samples}.flagstat.concord.txt"),samples=SAMPLES),
-      expand(join(working_dir,"rseqc/{samples}.inner_distance_freq.txt"),samples=SAMPLES),
-      expand(join(working_dir,"rseqc/{samples}.strand.info"),samples=SAMPLES),
-      expand(join(working_dir,"rseqc/{samples}.Rdist.info")samples=SAMPLES),
-      expand(join(working_dir,"QualiMap/{samples}/qualimapReport.html"),samples=SAMPLES),
-      expand(join(working_dir,"QualiMap/{samples}/genome_results.txt"),samples=SAMPLES),
-      expand(join(working_dir, "preseq/{sample}.ccurve"),samples=SAMPLES),
+      expand(join(working_dir, "bismarkAlign/{samples}.RnaSeqMetrics.txt"),samples=SAMPLES),
+      expand(join(working_dir, "bismarkAlign/{samples}.flagstat.concord.txt"),samples=SAMPLES),
+      expand(join(working_dir, "rseqc/{samples}.inner_distance_freq.txt"),samples=SAMPLES),
+      expand(join(working_dir, "rseqc/{samples}.strand.info"),samples=SAMPLES),
+      expand(join(working_dir, "rseqc/{samples}.Rdist.info"),samples=SAMPLES),
+      expand(join(working_dir, "QualiMap/{samples}/qualimapReport.html"),samples=SAMPLES),
+      expand(join(working_dir, "QualiMap/{samples}/genome_results.txt"),samples=SAMPLES),
+      expand(join(working_dir, "preseq/{samples}.ccurve"),samples=SAMPLES),
       expand(join(working_dir, "trimGalore/{samples}_insert_sizes.txt"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.dedup_rg_added.dmark.bam"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.dedup_rg_added.dmark.bai"),samples=SAMPLES),
@@ -312,20 +312,20 @@ rule kraken_pe:
         kronahtml = join(working_dir, "kraken","{samples}.trim.kraken_bacteria.krona.html"),
     params:
         rname='pl:kraken',
-        outdir=join(working_dir,"kraken"),
-        bacdb="/fdb/kraken/20170202_bacteria"
+        dir=join(working_dir,"kraken"),
+        bacdb="/fdb/kraken/20170202_bacteria",
+        prefix="{samples}",
     threads: 24
     shell:
       """
       module load kraken/1.1
       module load kronatools/2.7
-      if [ ! -d {params.dir} ];then mkdir {params.dir};fi
-
+      mkdir -p {params.dir}
       cd /lscratch/$SLURM_JOBID;
       cp -rv {params.bacdb} /lscratch/$SLURM_JOBID/;
 
       kdb_base=$(basename {params.bacdb})
-      kraken --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` --fastq-input --gzip-compressed --threads {threads} --output /lscratch/$SLURM_JOBID/{params.prefix}.krakenout --preload--paired {input.F1} {input.F2}
+      kraken --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` --fastq-input --gzip-compressed --threads {threads} --output /lscratch/$SLURM_JOBID/{params.prefix}.krakenout --preload--paired {input.fq1} {input.fq2}
       kraken-translate --mpa-format --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` /lscratch/$SLURM_JOBID/{params.prefix}.krakenout |cut -f2|sort|uniq -c|sort -k1,1nr > /lscratch/$SLURM_JOBID/{params.prefix}.krakentaxa
       cut -f 2,3 /lscratch/$SLURM_JOBID/{params.prefix}.krakenout | ktImportTaxonomy - -o /lscratch/$SLURM_JOBID/{params.prefix}.kronahtml
       """
@@ -526,7 +526,7 @@ rule picard:
     metrics=join(working_dir, "bismarkAlign/{samples}.star.duplic")
   params:
     rname='pl:picard',
-    sampleName="{sample}",
+    sampleName="{samples}",
   threads: 6
   shell:
     """
@@ -552,7 +552,7 @@ rule preseq:
   input:
     bam=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.dedup_rg_added.dmark.bam"),
   output:
-    ccurve = join(working_dir, "preseq/{sample}.ccurve"),
+    ccurve = join(working_dir, "preseq/{samples}.ccurve"),
   params:
     rname = "pl:preseq",
     dir = directory(join(working_dir, "preseq")),
@@ -589,11 +589,10 @@ rule rseqc:
     out1=join(working_dir,"rseqc/{samples}.strand.info"),
     out2=join(working_dir,"rseqc/{samples}.Rdist.info")
   params:
-    bedref=hg38_bed_ref
-    dir=join(working_dir,"rseqc")
+    bedref=hg38_bed_ref,
+    dir=join(working_dir,"rseqc"),
     rname="pl:rseqc",
   shell:
-
     """
     module load rseqc/4.0.0
     mkdir -p {params.dir}
@@ -626,7 +625,7 @@ rule stats:
     outstar2=join(working_dir,"bismarkAlign/{samples}.flagstat.concord.txt"),
   params:
     rname='pl:stats',
-    refflat=hg39_refFlat,
+    refflat=hg38_refFlat,
     rrnalist=hg38_rRNA_intervals,
     picardstrand="SECOND_READ_TRANSCRIPTION_STRAND",
     statscript=join("workflow", "scripts", "bam_count_concord_stats.py"),
@@ -712,27 +711,27 @@ rule multiqc:
 
 ############### Deconvolution rules begin here
 rule get_CpG:
-	input:
-		join(working_dir, "CpG/{samples}.bedGraph"),
-	output:
-		join(working_dir, "CpG_CSV/{samples}.csv"),
-	params:
-		rname="get_CpG",
-		cutoff=5,
-		script_dir=join(working_dir,"scripts"),
-		dir1=join(working_dir,"CpG_CSV"),
-		dir2=join(working_dir,"deconvolution_CSV"),
-	shell:
-		"""
-		mkdir -p {params.dir1}
-		mkdir -p {params.dir2}
-		module load R
-		Rscript {params.script_dir}/get_methy.R {input} {wildcards.samples} {params.cutoff} {output}
-		"""
+  input:
+    join(working_dir, "CpG/{samples}.bedGraph"),
+  output:
+    join(working_dir, "CpG_CSV/{samples}.csv"),
+  params:
+    rname="get_CpG",
+    cutoff=5,
+    script_dir=join(working_dir,"scripts"),
+    dir1=join(working_dir,"CpG_CSV"),
+    dir2=join(working_dir,"deconvolution_CSV"),
+  shell:
+    """
+    mkdir -p {params.dir1}
+    mkdir -p {params.dir2}
+    module load R
+    Rscript {params.script_dir}/get_methy.R {input} {wildcards.samples} {params.cutoff} {output}
+    """
 
 rule get_overlap_meth:
   input:
-    join(working_dir, "deconvolution_CSV/{samples}.meth.csv"),
+    join(working_dir, "CpG_CSV/{samples}.csv"),
   output:
     join(working_dir, "deconvolution_CSV/{samples}.csv"),
   params:
@@ -761,11 +760,11 @@ rule run_deconv:
     rname="run_deconv",
     ref=REF_ATLAS,
   shell:
-"""
-  module load python
-  cd {params.dir}
-  python {params.script_dir}/deconvolve.py --atlas_path {params.ref} --plot --residuals {input}  > {output}  2>&1
-"""
+    """
+    module load python
+    cd {params.dir}
+    python {params.script_dir}/deconvolve.py --atlas_path {params.ref} --plot --residuals {input}  > {output}  2>&1
+    """
 
 rule merge_tables:
   input:
