@@ -42,3 +42,18 @@ The pipeline is divided into 4 steps:
  * dmr - which uses the previously generated CpG profiles to identify differentially methylated regions between groups.
  * dcv - which uses the previously generated CpG to deconvolute the data and identify which tissues samples belong to based on methylation profiles
 
+#### Dry run of the pipeline
+
+To perform a dry run a step of the pipeline, choose a step (e.g. bismark) and submit:
+
+```
+sh pipeline_submit.sh npr /data/NHLBIcore/projects/methyl-seek
+```
+
+#### Actual run of the pipeline
+
+Once everything seems to work, to perform a full run of a step of the pipeline, submit:
+
+```
+sbatch --partition=norm --gres=lscratch:500 --time=10-00:00:00 --mail-type=BEGIN,END,FAIL pipeline_submit.sh process /data/NHLBIcore/projects/methyl-seek
+```
