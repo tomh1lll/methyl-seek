@@ -111,6 +111,11 @@ rule All:
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.cram"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.flagstat"),samples=SAMPLES),
 
+      # bwa-meth align to human reference genomes
+      expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.bam"),samples=SAMPLES),
+      expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.flagstat"),samples=SAMPLES),
+      expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.flagstat"),samples=SAMPLES),
+
       # get alignment statistics
       expand(join(working_dir,"bismarkAlign/{samples}.RnaSeqMetrics.txt"),samples=SAMPLES),
       expand(join(working_dir,"bismarkAlign/{samples}.flagstat.concord.txt"),samples=SAMPLES),
@@ -127,6 +132,7 @@ rule All:
 
       # extract CpG profile with methyldackel
       expand(join(working_dir, "CpG/{samples}.bedGraph"),samples=SAMPLES),
+      expand(join(working_dir, "CpG/{samples}.bm_pe.bedGraph"),samples=SAMPLES),
 
       # generate multiqc output
       "multiqc_report.html",
@@ -440,6 +446,75 @@ rule bismark_phage:
     mkdir -p {params.dir}
     bismark --multicore {threads} --temp_dir /lscratch/$SLURM_JOBID/ {params.command} --output_dir {params.dir} --genome {params.genome_dir} -1 {input.F1} -2 {input.F2}
     """
+
+################# bwa meth rules
+
+rule bwa_meth:
+  input:
+    F1=join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),
+    F2=join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),
+  output:
+    B1=temp(join(working_dir, "bwaMethAlign/{samples}.bm_pe.bam")),
+    B2=join(working_dir, "bwaMethAlign/{samples}.bm_pe.flagstat"),
+  params:
+    rname="bwa_meth",
+    dir=directory(join(working_dir,"bwaMethAlign")),
+    genome=hg38_fa,
+  threads:
+    16
+  shell:
+    """
+      module load bwa samtools/1.9 python
+      source /data/$USER/conda/etc/profile.d/conda.sh
+      conda activate meth
+      mkdir -p {params.dir}
+      module load samtools/1.9
+      bwameth.py  --threads {threads} --reference {params.genome} {input.F1} {input.F2} | samtools view -@ {threads} -hb | samtools sort -@ {threads} -o {output.B1}
+      samtools flagstat -@ {threads} {output.B1} > {output.B2}
+    """
+
+rule bwa_meth_dedup:
+    input:
+      B1=join(working_dir, "bwaMethAlign/{samples}.bm_pe.bam"),
+    output:
+      B1=temp(join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.bam")),
+      M1=temp(join(working_dir, "bwaMethAlign/{samples}.bm_pe.metrics.txt")),
+      B2=join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.flagstat"),
+    params:
+      rname="bwa_meth_dedup",
+      dir=directory(join(working_dir, "bwaMethAlign")),
+    threads:
+      16
+    shell:
+      """
+      module load picard
+      mkdir -p {params.dir}
+      java -Xmx20g -XX:ParallelGCThreads={threads} -jar $PICARDJARPATH/picard.jar MarkDuplicatesWithMateCigar -I {input.B1} -O {output.B1} -M {output.M1} --MINIMUM_DISTANCE 200
+      samtools flagstat -@ {threads} {output.B1} > {output.B2}
+      """
+
+rule extract_CpG_bwa_meth:
+    input:
+      F1=join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.bam"),
+    output:
+      B1=join(working_dir, "CpG/{samples}.bm_pe.bedGraph"),
+    params:
+      rname="extract_CpG_bwa_meth",
+      dir=directory(join(working_dir, "CpG_bwa")),
+      genome=hg38_fa,
+      prefix=join(working_dir,"CpG/{samples}.bm_pe"),
+    threads:
+      16
+    shell:
+      """
+      module load python
+      module load samtools
+      mkdir -p {params.dir}
+      source /data/hillts/conda/etc/profile.d/conda.sh
+      conda activate meth
+      module load samtools/1.9
+      MethylDackel extract -o {params.prefix} -@ {threads} {params.genome} {input.F1}
+      """
 
 ################## New edition - start
 rule picard:
