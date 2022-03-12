@@ -131,8 +131,8 @@ rule All:
       expand(join(working_dir, "bismarkAlign/{samples}.star.duplic"), samples=SAMPLES),
 
       # extract CpG profile with methyldackel
-      expand(join(working_dir, "CpG/{samples}.bedGraph"),samples=SAMPLES),
-      expand(join(working_dir, "CpG/{samples}.bm_pe.bedGraph"),samples=SAMPLES),
+      expand(join(working_dir, "CpG/{samples}_CpG.bedGraph"),samples=SAMPLES),
+      expand(join(working_dir, "CpG/{samples}.bm_pe_CpG.bedGraph"),samples=SAMPLES),
 
       # generate multiqc output
       "multiqc_report.html",
@@ -497,7 +497,7 @@ rule extract_CpG_bwa_meth:
     input:
       F1=join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.bam"),
     output:
-      B1=join(working_dir, "CpG/{samples}.bm_pe.bedGraph"),
+      B1=join(working_dir, "CpG/{samples}.bm_pe_CpG.bedGraph"),
     params:
       rname="extract_CpG_bwa_meth",
       dir=directory(join(working_dir, "CpG_bwa")),
@@ -644,7 +644,7 @@ rule extract_CpG_bismark:
     input:
       F1=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),
     output:
-      B1=join(working_dir, "CpG/{samples}.bedGraph"),
+      B1=join(working_dir, "CpG/{samples}_CpG.bedGraph"),
     params:
       rname="extract_CpG",
       dir=directory(join(working_dir, "CpG")),
