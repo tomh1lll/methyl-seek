@@ -712,7 +712,7 @@ rule multiqc:
 ############### Deconvolution rules begin here
 rule get_CpG:
   input:
-    join(working_dir, "CpG/{samples}.bedGraph"),
+    join(working_dir, "CpG/{samples}_CpG.bedGraph"),
   output:
     join(working_dir, "CpG_CSV/{samples}.csv"),
   params:
