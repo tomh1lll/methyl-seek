@@ -123,4 +123,9 @@
               "partition": "norm",
               "threads": "16",
       },
+      "manhatten": {
+              "mem": "30g",
+      },
+}
+
 }
