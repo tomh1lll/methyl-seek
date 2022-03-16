@@ -180,7 +180,7 @@ rule combP_figs:
     mkdir -p {params.dir}
     zcat {params.prefix}*.regions-p.bed.gz | grep -v "^#" > {output.p1}
     Rscript {params.script_dir}/combp_Manhatten.R {output.p1} {output.f3}
-    Rscript {params.script_dir}/rGREAT.R {output.p1} {output.f1} {output.o1} {output.o2}
+    Rscript {params.script_dir}/combp_GREAT.R {output.p1} {output.f1} {output.o1} {output.o2}
     """
 
 rule manhatten:
