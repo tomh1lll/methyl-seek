@@ -155,6 +155,30 @@ rule combP:
       awk 'NR==FNR{{a[$4]=$5;next}}NR!=FNR{{c=$1; if(c in a){{print $0"\t"a[c]}}}}' {output.homerInput} {output.homerOutput} > {output.homerOutput2}
     """
 
+rule combP_figs:
+  input:
+    join(working_dir, "combP/{group}_{chr}.regions-p.bed.gz),
+  output:
+    p1=join(working_dir, "combP/{group}.regions-p.bed"),
+    f1=join(working_dir, "figs/{group}_GREATfig1.png"),
+    f2=join(working_dir, "figs/{group}_GREATfig2.png"),
+    f3=join(working_dir, "figs/{group}_manhatten.png"),
+    o1=join(working_dir, "combP/{group}.Processes.txt"),
+    o2=join(working_dir, "combP/{group}.function.txt"),
+  params:
+    rname="combP_figs",
+    dir=join(working_dir, "figs"),
+    prefix=join(working_dir, "combP/{group}_chr"),
+    script_dir=join(working_dir,"scripts"),
+  shell:
+    """
+    module load R
+    mkdir -p {params.dir}
+    zcat {params.prefix}*.regions-p.bed.gz | grep -v "^#" > {output.p1}
+    Rscript {params.script_dir}/rGREAT.R {output.p1} {output.f1} {output.f2} {output.o1} {output.o2}
+    Rscript {params.script_dir}/combp_Manhatten.R {output.p1} {output.f3}
+    """
+
 rule manhatten:
   input:
     expand(join(working_dir, "bsseq/{group}_{chr}_betas_pval.bed"),chr=CHRS,group=GROUPS),
