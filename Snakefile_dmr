@@ -163,7 +163,7 @@ rule combP:
 
 rule combP_figs:
   input:
-    join(working_dir, "combP/{group}_{chr}.regions-p.bed.gz),
+    expand(join(working_dir, "combP/{group}_{chr}.regions-p.bed.gz),group=GROUPS,chr=CHRS),
   output:
     p1=join(working_dir, "combP/{group}.regions-p.bed"),
     f1=join(working_dir, "figs/{group}_GREATfig1.png"),
