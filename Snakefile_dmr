@@ -167,7 +167,6 @@ rule combP_figs:
   output:
     p1=join(working_dir, "combP/{group}.regions-p.bed"),
     f1=join(working_dir, "figs/{group}_GREATfig1.png"),
-    f2=join(working_dir, "figs/{group}_GREATfig2.png"),
     f3=join(working_dir, "figs/{group}_manhatten.png"),
     o1=join(working_dir, "combP/{group}.GREATprocesses.txt"),
     o2=join(working_dir, "combP/{group}.GREATfunction.txt"),
@@ -182,7 +181,7 @@ rule combP_figs:
     mkdir -p {params.dir}
     zcat {params.prefix}*.regions-p.bed.gz | grep -v "^#" > {output.p1}
     Rscript {params.script_dir}/combp_Manhatten.R {output.p1} {output.f3}
-    Rscript {params.script_dir}/rGREAT.R {output.p1} {output.f1} {output.f2} {output.o1} {output.o2}
+    Rscript {params.script_dir}/rGREAT.R {output.p1} {output.f1} {output.o1} {output.o2}
     """
 
 rule manhatten:
