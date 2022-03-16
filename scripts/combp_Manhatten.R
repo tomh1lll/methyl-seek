@@ -20,7 +20,7 @@ mergefile2$Log10P = -1*log10(mergefile2$p)
 mergefile2$mb = mergefile2$start/1000000
 mergefile2$chr <- factor(mergefile2$chr, levels = chrs)
 
-cutoff = -1*(log10(0.05/length(mergefile2$chr)))
+cutoff = -1*(log10(0.05))
 ylim <- abs(floor(log10(min(na.omit(mergefile2$p))))) + 2
 nCHR <- length(unique(mergefile2$chr))
 
