@@ -81,7 +81,6 @@ rule All:
       # combp summary of results
       expand(join(working_dir, "combP/{group}.regions-p.bed"),group=GROUPS),
       expand(join(working_dir, "figs/{group}_GREATfig1.png"),group=GROUPS),
-      expand(join(working_dir, "figs/{group}_GREATfig2.png"),group=GROUPS),
       expand(join(working_dir, "figs/{group}_manhatten.png"),group=GROUPS),
       expand(join(working_dir, "combP/{group}.GREATprocesses.txt"),group=GROUPS),
       expand(join(working_dir, "combP/{group}.GREATfunction.txt"),group=GROUPS),
