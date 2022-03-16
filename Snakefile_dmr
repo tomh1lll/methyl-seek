@@ -78,7 +78,13 @@ rule All:
       expand(join(working_dir, "combP/{group}_{chr}.regions-p.bed.gz"),chr=CHRS,group=GROUPS),
       # summary figures of analysis
       expand(join(working_dir,"figs/{group}_manhatten.png"),group=GROUPS),
-
+      # combp summary of results
+      expand(join(working_dir, "combP/{group}.regions-p.bed"),group=GROUPS),
+      expand(join(working_dir, "figs/{group}_GREATfig1.png"),group=GROUPS),
+      expand(join(working_dir, "figs/{group}_GREATfig2.png"),group=GROUPS),
+      expand(join(working_dir, "figs/{group}_manhatten.png"),group=GROUPS),
+      expand(join(working_dir, "combP/{group}.GREATprocesses.txt"),group=GROUPS),
+      expand(join(working_dir, "combP/{group}.GREATfunction.txt"),group=GROUPS),
 
 rule bsseq_inputs:
   input:
@@ -163,8 +169,8 @@ rule combP_figs:
     f1=join(working_dir, "figs/{group}_GREATfig1.png"),
     f2=join(working_dir, "figs/{group}_GREATfig2.png"),
     f3=join(working_dir, "figs/{group}_manhatten.png"),
-    o1=join(working_dir, "combP/{group}.Processes.txt"),
-    o2=join(working_dir, "combP/{group}.function.txt"),
+    o1=join(working_dir, "combP/{group}.GREATprocesses.txt"),
+    o2=join(working_dir, "combP/{group}.GREATfunction.txt"),
   params:
     rname="combP_figs",
     dir=join(working_dir, "figs"),
@@ -175,8 +181,8 @@ rule combP_figs:
     module load R
     mkdir -p {params.dir}
     zcat {params.prefix}*.regions-p.bed.gz | grep -v "^#" > {output.p1}
-    Rscript {params.script_dir}/rGREAT.R {output.p1} {output.f1} {output.f2} {output.o1} {output.o2}
     Rscript {params.script_dir}/combp_Manhatten.R {output.p1} {output.f3}
+    Rscript {params.script_dir}/rGREAT.R {output.p1} {output.f1} {output.f2} {output.o1} {output.o2}
     """
 
 rule manhatten:
