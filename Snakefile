@@ -693,6 +693,10 @@ rule multiqc:
   input:
     expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.bam"),samples=SAMPLES),
     expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),samples=SAMPLES),
+    expand(join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),samples=SAMPLES),
+    expand(join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),samples=SAMPLES),
+    PE1=temp(join(working_dir, "trimmed_reads/{samples}.R1.pe.fastq.gz")),
+    PE2=temp(join(working_dir, "trimmed_reads/{samples}.R2.pe.fastq.gz")),
   output:
     "multiqc_report.html",
   params:
