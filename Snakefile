@@ -319,16 +319,25 @@ rule kraken_pe:
     threads: 24
     shell:
       """
-      module load kraken/1.1
+      module load kraken
       module load kronatools/2.7
       mkdir -p {params.dir}
       cd /lscratch/$SLURM_JOBID;
       cp -rv {params.bacdb} /lscratch/$SLURM_JOBID/;
 
       kdb_base=$(basename {params.bacdb})
-      kraken --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` --fastq-input --gzip-compressed --threads {threads} --output /lscratch/$SLURM_JOBID/{params.prefix}.krakenout --preload--paired {input.fq1} {input.fq2}
-      kraken-translate --mpa-format --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` /lscratch/$SLURM_JOBID/{params.prefix}.krakenout |cut -f2|sort|uniq -c|sort -k1,1nr > /lscratch/$SLURM_JOBID/{params.prefix}.krakentaxa
-      cut -f 2,3 /lscratch/$SLURM_JOBID/{params.prefix}.krakenout | ktImportTaxonomy - -o /lscratch/$SLURM_JOBID/{params.prefix}.kronahtml
+      kraken2 --db /lscratch/$SLURM_JOBID/${{kdb_base}} \
+        --threads {threads} --report {output.krakentaxa} \
+        --output {output.krakenout} \
+        --gzip-compressed \
+        --paired {input.fq1} {input.fq2}
+      # Generate Krona Report
+      cut -f2,3 {output.krakenout} | ktImportTaxonomy - -o {output.kronahtml}
+      
+      #kdb_base=$(basename {params.bacdb})
+      #kraken --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` --fastq-input --gzip-compressed --threads {threads} --output /lscratch/$SLURM_JOBID/{params.prefix}.krakenout --preload--paired {input.fq1} {input.fq2}
+      #kraken-translate --mpa-format --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` /lscratch/$SLURM_JOBID/{params.prefix}.krakenout |cut -f2|sort|uniq -c|sort -k1,1nr > /lscratch/$SLURM_JOBID/{params.prefix}.krakentaxa
+      #cut -f 2,3 /lscratch/$SLURM_JOBID/{params.prefix}.krakenout | ktImportTaxonomy - -o /lscratch/$SLURM_JOBID/{params.prefix}.kronahtml
       """
 
 ################## New edition - ended
