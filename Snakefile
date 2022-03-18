@@ -115,6 +115,7 @@ rule All:
       expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.bam"),samples=SAMPLES),
       expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.flagstat"),samples=SAMPLES),
       expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.flagstat"),samples=SAMPLES),
+      expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.metrics.txt"),samples=SAMPLES),
 
       # get alignment statistics
       expand(join(working_dir, "bismarkAlign/{samples}.RnaSeqMetrics.txt"),samples=SAMPLES),
@@ -362,6 +363,10 @@ rule bismark_align:
     output:
       B1=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.bam"),
       B2=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.flagstat"),
+      FQ1=temp(join(working_dir, "bismarkAlign/{samples}_val_1.fq.gz_unmapped_reads_1.fq.gz")),
+      FQ2=temp(join(working_dir, "bismarkAlign/{samples}_val_2.fq.gz_unmapped_reads_2.fq.gz")),
+      FQ3=temp(join(working_dir, "bismarkAlign/{samples}_val_1.fq.gz_ambiguous_reads_1.fq.gz")),
+      FQ4=temp(join(working_dir, "bismarkAlign/{samples}_val_2.fq.gz_ambiguous_reads_2.fq.gz")),
     params:
       rname="bismark_align",
       dir=directory(join(working_dir, "bismarkAlign")),
@@ -478,7 +483,7 @@ rule bwa_meth_dedup:
       B1=join(working_dir, "bwaMethAlign/{samples}.bm_pe.bam"),
     output:
       B1=temp(join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.bam")),
-      M1=temp(join(working_dir, "bwaMethAlign/{samples}.bm_pe.metrics.txt")),
+      M1=join(working_dir, "bwaMethAlign/{samples}.bm_pe.metrics.txt"),
       B2=join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.flagstat"),
     params:
       rname="bwa_meth_dedup",
@@ -664,39 +669,15 @@ rule extract_CpG_bismark:
       MethylDackel extract -o {params.prefix} -@ {threads} {params.genome} {input.F1}
       """
 
-rule cleanup_bams:
-  input:
-    B2=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),
-    G1=join(working_dir, "CpG/{samples}.bedGraph"),
-  output:
-    C2=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.cram"),
-  params:
-    rname="cleanup_bams",
-    genome=hg38_fa,
-    FQ1=join(working_dir, "bismarkAlign/{samples}_val_1.fq.gz_unmapped_reads_1.fq.gz"),
-    FQ2=join(working_dir, "bismarkAlign/{samples}_val_2.fq.gz_unmapped_reads_2.fq.gz"),
-    FQ3=join(working_dir, "bismarkAlign/{samples}_val_1.fq.gz_ambiguous_reads_1.fq.gz"),
-    FQ4=join(working_dir, "bismarkAlign/{samples}_val_2.fq.gz_ambiguous_reads_2.fq.gz"),
-  threads:
-    8
-  shell:
-    """
-      module load samtools
-      samtools -h -C -@ {threads} -T {params.genome} {input.B2} > {output.C2}
-      rm {params.FQ1}
-      rm {params.FQ2}
-      rm {params.FQ3}
-      rm {params.FQ4}
-    """
-
 rule multiqc:
   input:
     expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.bam"),samples=SAMPLES),
     expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),samples=SAMPLES),
     expand(join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),samples=SAMPLES),
     expand(join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),samples=SAMPLES),
-    PE1=temp(join(working_dir, "trimmed_reads/{samples}.R1.pe.fastq.gz")),
-    PE2=temp(join(working_dir, "trimmed_reads/{samples}.R2.pe.fastq.gz")),
+    expand(join(working_dir, "trimmed_reads/{samples}.R1.pe.fastq.gz"),samples=SAMPLES),
+    expand(join(working_dir, "trimmed_reads/{samples}.R2.pe.fastq.gz"),samples=SAMPLES),
+    expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.bam")),
   output:
     "multiqc_report.html",
   params:
