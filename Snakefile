@@ -129,6 +129,7 @@ rule All:
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.dedup_rg_added.dmark.bam"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.dedup_rg_added.dmark.bai"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.star.duplic"), samples=SAMPLES),
+      expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),samples=SAMPLES),
 
       # extract CpG profile with methyldackel
       expand(join(working_dir, "CpG/{samples}_CpG.bedGraph"),samples=SAMPLES),
@@ -394,6 +395,7 @@ rule bismark_dedup:
       T1=temp(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.deduplicated.bam")),
       B1=temp(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam")),
       B2=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.flagstat"),
+      C1=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),
     params:
       rname="bismark_dedup",
       dir=directory(join(working_dir, "bismarkAlign")),
@@ -407,6 +409,7 @@ rule bismark_dedup:
       deduplicate_bismark --paired --bam --outfile {output.B1} {input.F1}
       samtools view -hb {output.T1} | samtools sort -@ {threads} -O BAM -o {output.B1}
       samtools flagstat -@ {threads} {output.B1} > {output.B2}
+      samtools coverage {output.B1} > {output.C1}
       """
 
 rule prep_bisulphite_phage_genome:
