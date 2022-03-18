@@ -108,10 +108,10 @@ rule All:
       # bismark align to human reference genomes
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.bam"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.flagstat"),samples=SAMPLES),
-      expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.cram"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.flagstat"),samples=SAMPLES),
 
       # bwa-meth align to human reference genomes
+      expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.bam"),samples=SAMPLES),
       expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.flagstat"),samples=SAMPLES),
       expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.deduplicated.flagstat"),samples=SAMPLES),
       expand(join(working_dir, "bwaMethAlign/{samples}.bm_pe.metrics.txt"),samples=SAMPLES),
