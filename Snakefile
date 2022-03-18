@@ -258,11 +258,12 @@ rule bbmerge:
       join(working_dir, "trimGalore/{samples}_insert_sizes.txt"),
     params:
       rname='pl:bbmerge',
+      script_dir=join(working_dir,"scripts"),
     threads: 4
     shell: """
       # Get encoding of Phred Quality Scores
       module load python
-      encoding=$(python phred_encoding.py {input.R1})
+      encoding=$(python {params.script_dir}/phred_encoding.py {input.R1})
       echo "Detected Phred+${{encoding}} ASCII encoding"
 
       module load bbtools/38.87
