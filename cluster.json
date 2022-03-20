@@ -26,7 +26,7 @@
               "threads": "16",
       },
       "bbmerge": {
-          "mem": "64g",
+          "mem": "128g",
           "threads": "4"
       },
       "fastq_screen": {
