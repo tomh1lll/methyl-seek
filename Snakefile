@@ -409,6 +409,7 @@ rule bismark_dedup:
     params:
       rname="bismark_dedup",
       dir=directory(join(working_dir, "bismarkAlign")),
+      prefix=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe"),
     threads:
       16
     shell:
@@ -416,8 +417,10 @@ rule bismark_dedup:
       module load bismark/0.23.0
       module load samtools/1.15
       cd {params.dir}
-      deduplicate_bismark --paired --bam --outfile {output.B1} {input.F1}
-      samtools view -hb {output.T1} | samtools sort -n -@ {threads} -O BAM -o {output.B1}
+      samtools view -hb {input.F1} | samtools sort -n -@ {threads} -O BAM -o {output.T1}
+      deduplicate_bismark --paired --bam --outfile {params.prefix} {output.T1}
+      #deduplicate_bismark --paired --bam --outfile {output.B1} {input.F1}
+      #samtools view -hb {output.T1} | samtools sort -n -@ {threads} -O BAM -o {output.B1}
       samtools flagstat -@ {threads} {output.B1} > {output.B2}
       #samtools coverage {output.B1} > {output.C1}
       """
