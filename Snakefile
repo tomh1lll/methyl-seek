@@ -129,7 +129,7 @@ rule All:
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.dedup_rg_added.dmark.bam"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.dedup_rg_added.dmark.bai"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.star.duplic"), samples=SAMPLES),
-      expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),samples=SAMPLES),
+      #expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),samples=SAMPLES),
 
       # extract CpG profile with methyldackel
       expand(join(working_dir, "CpG/{samples}_CpG.bedGraph"),samples=SAMPLES),
@@ -405,7 +405,7 @@ rule bismark_dedup:
       T1=temp(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.deduplicated.bam")),
       B1=temp(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam")),
       B2=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.flagstat"),
-      C1=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),
+      #C1=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),
     params:
       rname="bismark_dedup",
       dir=directory(join(working_dir, "bismarkAlign")),
@@ -417,10 +417,28 @@ rule bismark_dedup:
       module load samtools/1.15
       cd {params.dir}
       deduplicate_bismark --paired --bam --outfile {output.B1} {input.F1}
-      samtools view -hb {output.T1} | samtools sort -@ {threads} -O BAM -o {output.B1}
+      samtools view -hb {output.T1} | samtools sort -n -@ {threads} -O BAM -o {output.B1}
       samtools flagstat -@ {threads} {output.B1} > {output.B2}
-      samtools coverage {output.B1} > {output.C1}
+      #samtools coverage {output.B1} > {output.C1}
       """
+
+rule bismark_extract:
+  input:
+    bam=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),
+  output:
+    cov=join(working_dir, "CpG/{samples}.bismark_pe.deduplicated.bismark.cov.gz"),
+    graph=temp(join(working_dir, "CpG/{samples}.bismark_pe.deduplicated_CpG.bedGraph")),
+  params:
+    rname='pl:bismark_extract',
+    bismark_index=bisulphite_genome_path,
+    outdir=directory(join(working_dir, "CpG")),
+  shell:
+    """
+    mkdir -p {params.outdir}
+    module load bismark
+    bismark_methylation_extractor --paired-end --no_overlap --multicore 8 --gzip --report --bedGraph --counts --buffer_size 100G --no_header --cytosine_report --output {params.outdir} --scaffolds --genome_folder {params.bismark_index} {input.bam}
+    gunzip -c {output.cov} > {output.graph}
+    """
 
 rule prep_bisulphite_phage_genome:
     input:
@@ -709,7 +727,7 @@ rule multiqc:
 ############### Deconvolution rules begin here
 rule get_CpG:
   input:
-    join(working_dir, "CpG/{samples}_CpG.bedGraph"),
+    join(working_dir, "CpG/{samples}.bismark_pe.deduplicated_CpG.bedGraph"),
   output:
     join(working_dir, "CpG_CSV/{samples}.csv"),
   params:
