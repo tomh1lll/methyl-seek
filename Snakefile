@@ -433,7 +433,7 @@ rule bismark_extract:
     graph=temp(join(working_dir, "CpG/{samples}.bismark_pe.deduplicated_CpG.bedGraph")),
   params:
     rname='pl:bismark_extract',
-    bismark_index=bisulphite_genome_path,
+    bismark_index=join(bisulphite_genome_path,species),
     outdir=directory(join(working_dir, "CpG")),
   shell:
     """
