@@ -11,7 +11,7 @@ module load snakemake/5.13.0
 
 cd $SLURM_SUBMIT_DIR
 
-R=$3
+R=$2
 echo $R
 
 mkdir -p $R/snakejobs
@@ -48,10 +48,10 @@ CLUSTER_OPTS="sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p 
 
 if [ $1 == "npr" ]
 then
-    snakemake -npr --snakefile $R/Snakefile -j 1
+    snakemake -npr --snakefile $R/Snakefile -j 1 --configfile $R/config.yaml
 fi
 
 if [ $1 == "process" ]
 then
-    snakemake --latency-wait 120  -s $R/Snakefile -d $R --printshellcmds --cluster-config $R/cluster.json --keep-going --restart-times 1 --cluster "$CLUSTER_OPTS" -j 500 --rerun-incomplete --stats $R/reports/snakemake.stats | tee -a $R/reports/snakemake.log
+    snakemake --latency-wait 120  -s $R/Snakefile -d $R --printshellcmds --configfile $R/config.yaml --cluster-config $R/cluster.json --keep-going --restart-times 1 --cluster "$CLUSTER_OPTS" -j 500 --rerun-incomplete --stats $R/reports/snakemake.stats | tee -a $R/reports/snakemake.log
 fi
