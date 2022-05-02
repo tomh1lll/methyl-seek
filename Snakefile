@@ -62,12 +62,12 @@ CpG_MAP_TABLE=config["CpG_MAP_TABLE"]
 df = pd.read_csv(sample_file, header=0, sep='\t')
 
 SAMPLES=list(set(df['sample'].tolist()))
-GROUPS=list(set(df['comp'].tolist()))
+#GROUPS=list(set(df['comp'].tolist()))
 
 print(SAMPLES)
 print(len(SAMPLES))
-print(GROUPS)
-print(len(GROUPS))
+#print(GROUPS)
+#print(len(GROUPS))
 
 CHRS = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chr20','chr21','chr22','chr23','chrX']
 
