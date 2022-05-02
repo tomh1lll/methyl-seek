@@ -20,12 +20,6 @@ mkdir -p $R/reports
 ##
 ## Test commandline arguments
 ##
-if [ $# -ne 1 ]; then
-    echo " "
-    echo "Requires a single commandline argument: npr or process"
-    echo " "
-    exit
-fi
 
 if [ $1 != "npr" ] && [ $1 != "process" ] ; then
     echo " "
