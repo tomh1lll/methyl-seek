@@ -125,8 +125,7 @@ rule All:
       #expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),samples=SAMPLES),
 
       # extract CpG profile with methyldackel
-      expand(join(working_dir, "CpG/{samples}_CpG.bedGraph"),samples=SAMPLES),
-      expand(join(working_dir, "CpG/{samples}.bm_pe_CpG.bedGraph"),samples=SAMPLES),
+      expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),samples=SAMPLES),
 
       # generate multiqc output
       "multiqc_report.html",
@@ -398,7 +397,7 @@ rule bismark_dedup:
       T1=temp(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.deduplicated.bam")),
       B1=temp(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam")),
       B2=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.flagstat"),
-      C1=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.deduplicated.cram"),
+      C1=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.cram"),
     params:
       rname="bismark_dedup",
       dir=directory(join(working_dir, "bismarkAlign")),
