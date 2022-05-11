@@ -80,7 +80,6 @@ rule All:
 
       # Checking data quality:
       expand(join(working_dir, "rawQC/{samples}.{rn}_fastqc.html"), samples=SAMPLES, rn=RN),
-      expand(join(working_dir, "trimQC/{samples}.{rn}.pe_fastqc.html"), samples=SAMPLES, rn=RN),
 
       # Quality trimming output:
       expand(join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),samples=SAMPLES),
