@@ -173,35 +173,12 @@ rule raw_fastqc:
       fastqc -o {params.dir} -f fastq --threads {threads} --extract {input}
       """
 
-## Trim raw data
-rule trimmomatic:
+
+## trimming/filtering with trimGalore
+rule trimGalore:
     input:
       F1=join(working_dir, "raw/{samples}.R1.fastq.gz"),
       F2=join(working_dir, "raw/{samples}.R2.fastq.gz"),
-    output:
-      PE1=temp(join(working_dir, "trimmed_reads/{samples}.R1.pe.fastq.gz")),
-      UPE1=temp(join(working_dir, "trimmed_reads/{samples}.R1.ue.fastq.gz")),
-      PE2=temp(join(working_dir, "trimmed_reads/{samples}.R2.pe.fastq.gz")),
-      UPE2=temp(join(working_dir, "trimmed_reads/{samples}.R2.ue.fastq.gz"))
-    params:
-      rname="trimmomatic",
-      dir=directory(join(working_dir, "trimmed_reads")),
-      batch='--cpus-per-task=8 --partition=norm --gres=lscratch:180 --mem=25g --time=20:00:00',
-      command='ILLUMINACLIP:/usr/local/apps/trimmomatic/Trimmomatic-0.39/adapters/TruSeq3-PE-2.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50'
-    threads:
-      8
-    shell:
-      """
-      module load trimmomatic/0.39
-      mkdir -p {params.dir}
-      java -jar $TRIMMOJAR PE -phred33 -threads {threads} {input.F1} {input.F2} {output.PE1} {output.UPE1} {output.PE2} {output.UPE2} {params.command}
-      """
-
-## Second round of trimming/filtering
-rule trimGalore:
-    input:
-      F1=join(working_dir, "trimmed_reads/{samples}.R1.pe.fastq.gz"),
-      F2=join(working_dir, "trimmed_reads/{samples}.R2.pe.fastq.gz"),
     output:
       join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),
       join(working_dir, "trimGalore/{samples}_val_2.fq.gz")
@@ -220,25 +197,6 @@ rule trimGalore:
       module load fastqc/0.11.9
       mkdir -p {params.dir}
       trim_galore --paired --cores {threads} {params.command} --basename {params.tag} --output_dir {params.dir} --fastqc_args "--outdir {params.fastqcdir}"  {input.F1} {input.F2}
-      """
-
-## Run fastqc on filtered/trimmed data to visually assess quality for R1
-rule trim_fastqc:
-    input:
-      join(working_dir, "trimmed_reads/{samples}.{rn}.pe.fastq.gz"),
-    output:
-      join(working_dir, "trimQC/{samples}.{rn}.pe_fastqc.html"),
-    params:
-      rname="trim_fastqc",
-      dir=directory(join(working_dir, "trimQC")),
-      batch='--cpus-per-task=2 --mem=8g --time=8:00:00',
-    threads:
-      2
-    shell:
-      """
-      module load fastqc/0.11.9
-      mkdir -p {params.dir}
-      fastqc -o {params.dir} -f fastq --threads {threads} --extract {input}
       """
 
 ################## New edition - started
@@ -605,8 +563,6 @@ rule multiqc:
     expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),samples=SAMPLES),
     expand(join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),samples=SAMPLES),
     expand(join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),samples=SAMPLES),
-    expand(join(working_dir, "trimmed_reads/{samples}.R1.pe.fastq.gz"),samples=SAMPLES),
-    expand(join(working_dir, "trimmed_reads/{samples}.R2.pe.fastq.gz"),samples=SAMPLES),
   output:
     "multiqc_report.html",
   params:
