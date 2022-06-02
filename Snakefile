@@ -9,7 +9,7 @@
 # Contact details: Tom Hill (tom.hill@nih.gov), Neelam Redekar (neelam.redekar@nih.gov),
 # Skyler Kuhn (skyler.kuhn@nih.gov), Asya Khleborodova (asya.khleborodova@nih.gov)
 #
-# Last Modified: March 8, 2022
+# Last Modified: June 2, 2022
 #
 #####################################################################################################
 
@@ -39,27 +39,12 @@ species= config["species"]
 REF_ATLAS=config["REF_ATLAS"]
 CpG_MAP_TABLE=config["CpG_MAP_TABLE"]
 
-##
-## Read in the masterkey file for 3 tab-delimited columns of samples, groups and comparison
-## Each sample can be in the file multiple times if used in multiple comparisons, but will only be mapped/process once.
-##
-## e.g.
-##
-##sample	group	comp
-##S1	GA	GAvsGB
-##S2	GA	GAvsGB
-##S3	GB	GAvsGB
-##S4	GB	GAvsGB
-##S5	GC	GAvsGC
-##S6	GC	GAvsGC
-##S1	GA	GAvsGC
-##S2	GA	GAvsGC
 
 ## The file requires these headings as they are used in multiple rules later on.
 
 ## Here we read in the samples file generated and begin processing the data, printing out the samples and group comparisons
 
-df = pd.read_csv(sample_file, header=0, sep='\t')
+df = pd.read_csv(sample_file, header=None)
 
 SAMPLES=list(set(df['sample'].tolist()))
 #GROUPS=list(set(df['comp'].tolist()))
