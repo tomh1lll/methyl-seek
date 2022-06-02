@@ -18,6 +18,27 @@ find "$INPUT_DIRECTORY" -iname '*R?.fastq.gz' | sed 's/.R[1,2].fastq.gz//g' | so
 
 echo $R
 
+echo "generate config.yaml"
+
+cat << EOF > $R/config.yaml
+result_dir: "${R}"
+hg38_fa: "/data/NHLBI_IDSS/references/Bismark_Genomes/hg38/genome.fa"
+hg38_gtf: "/fdb/igenomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.gtf"
+hg38_rRNA_intervals: "/data/NHLBI_IDSS/references/Bismark_Genomes/hg38/RNA-Seek_build/hg38.rRNA_interval_list"
+hg38_refFlat: "/data/NHLBI_IDSS/references/Bismark_Genomes/hg38/RNA-Seek_build/refFlat.txt"
+hg38_bed_ref: "/data/NHLBI_IDSS/references/Bismark_Genomes/hg38/RNA-Seek_build/genes.ref.bed"
+mm10_fa: "/fdb/igenomes/Mus_musculus/UCSC/mm10/Sequence/WholeGenomeFasta/genome.fa"
+rn6_fa: "/fdb/igenomes/Rattus_norvegicus/UCSC/rn6/Sequence/WholeGenomeFasta/genome.fa"
+bisulphite_ref: "/data/NHLBI_IDSS/references/Bismark_Genomes"
+bisulphite_fa: "/fdb/igenomes/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa"
+phage_fa: "/data/NHLBI_IDSS/references/Bismark_Genomes/phage/genome.fa"
+phage_ref: "/data/NHLBI_IDSS/references/Bismark_Genomes/phage"
+species: "hg38"
+REF_ATLAS: "/data/NHLBI_IDSS/references/MethylCpG_deconvolution/resources/reference_atlas.csv"
+CpG_MAP_TABLE: "/data/NHLBI_IDSS/references/MethylCpG_deconvolution/resources/reference_atlas.hg38.unique.bed"
+
+EOF
+
 mkdir -p $R/snakejobs
 mkdir -p $R/reports
 
