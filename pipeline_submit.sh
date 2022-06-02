@@ -11,7 +11,11 @@ module load snakemake/5.13.0
 
 cd $SLURM_SUBMIT_DIR
 
-R=$2
+R=$3
+INPUT_DIRECTORY=$2
+
+find "$INPUT_DIRECTORY" -iname '*R?.fastq.gz' | sed 's/.R[1,2].fastq.gz//g' | sort | uniq > $R/samples.txt
+
 echo $R
 
 mkdir -p $R/snakejobs
@@ -55,3 +59,4 @@ if [ $1 == "process" ]
 then
     snakemake --latency-wait 120  -s $R/Snakefile -d $R --printshellcmds --configfile $R/config.yaml --cluster-config $R/cluster.json --keep-going --restart-times 1 --cluster "$CLUSTER_OPTS" -j 500 --rerun-incomplete --stats $R/reports/snakemake.stats | tee -a $R/reports/snakemake.log
 fi
+
