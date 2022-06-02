@@ -23,7 +23,7 @@ import pandas as pd
 ## Locations of working directories and reference genomes for analysis
 ##
 sample_file= config["samples"]
-rawdata_dir= config["rawdata_dir"]
+#rawdata_dir= config["rawdata_dir"]
 working_dir= config["result_dir"]
 hg38_fa= config["hg38_fa"]
 phage_fa= config["phage_fa"]
@@ -45,8 +45,12 @@ CpG_MAP_TABLE=config["CpG_MAP_TABLE"]
 ## Here we read in the samples file generated and begin processing the data, printing out the samples and group comparisons
 
 df = pd.read_csv(sample_file, header=None)
+df1=df[0].str.split("/",expand=True)
 
-SAMPLES=list(set(df['sample'].tolist()))
+SAMPLES=list(set(df1.iloc[: , -1].tolist()))
+rawdata_dir="/".join(df1.iloc[0 , :-1].tolist()) 
+
+#SAMPLES=list(set(df[0].tolist()))
 #GROUPS=list(set(df['comp'].tolist()))
 
 print(SAMPLES)
