@@ -75,7 +75,7 @@
         "mem": "110g",
         "threads": "4"
       },
-      "extract_CpG_bismark": {
+      "bismark_extract": {
               "mem": "100g",
               "time": "24:00:00",
               "partition": "norm",
