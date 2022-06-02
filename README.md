@@ -16,35 +16,22 @@ conda deactivate meth
 
 Alter the config.yaml so the rawdata_dir is the absolute path of the directory containing all your fastqs.
 Alter the result_dir so it is the absolute path of the working directory containing your snakemake pipeline, where results will be stored.
-Alter samples in config.yaml to be the absolute path of your samples.txt. Check this is correct. The samples file should have the following tab-delimited format:
+Alter samples in config.yaml to be the absolute path of your samples.txt. Check this is correct. The samples file should have a list of all sample IDs, one per line, as follows:
 
 ```
-sample  group comp
-S1  GA  GAvsGB
-S2  GA  GAvsGB
-S3  GB  GAvsGB
-S4  GB  GAvsGB
-S5  GC  GAvsGC
-S6  GC  GAvsGC
-S1  GA  GAvsGC
-S2  GA  GAvsGC
+S1
+S2
+S3
+S4
+S5
+S6
 ```
 
-Where GA, GB & GC are the groups these 6 samples belong to.
-
-
-###### Need combine multiple Snakefiles into one while still keeping four steps different
-
-The pipeline is divided into 4 steps:
-
- * bismark - which performs quality control steps and maps the data using Bismark, before extracting CpG profiles using MethylDackel.
- * bwa - which performs quality control steps and maps the data using BWA-Meth instead of Bismark, before extracting CpG profiles using MethylDackel.
- * dmr - which uses the previously generated CpG profiles to identify differentially methylated regions between groups.
- * dcv - which uses the previously generated CpG to deconvolute the data and identify which tissues samples belong to based on methylation profiles
+The pipeline performs quality control steps and maps the data using Bismark, before extracting CpG profiles using Bismark. Following this the pipeline uses the previously generated CpG to deconvolute the data and identify which tissues samples belong to based on methylation profiles.
 
 #### Dry run of the pipeline
 
-To perform a dry run a step of the pipeline, choose a step (e.g. bismark) and submit:
+To perform a dry run a step of the pipeline, giving the pipeline the working directory where results will be stored, and submit:
 
 ```
 sh pipeline_submit.sh npr /data/NHLBIcore/projects/methyl-seek
