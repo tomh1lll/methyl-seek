@@ -21,6 +21,7 @@ echo $R
 echo "generate config.yaml"
 
 cat << EOF > $R/config.yaml
+samples: "${R}/samples.txt"
 result_dir: "${R}"
 hg38_fa: "/data/NHLBI_IDSS/references/Bismark_Genomes/hg38/genome.fa"
 hg38_gtf: "/fdb/igenomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.gtf"
