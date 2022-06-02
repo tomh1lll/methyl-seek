@@ -22,7 +22,7 @@ import pandas as pd
 ##
 ## Locations of working directories and reference genomes for analysis
 ##
-sample_file= config["samples"]
+#sample_file= config["samples"]
 #rawdata_dir= config["rawdata_dir"]
 working_dir= config["result_dir"]
 hg38_fa= config["hg38_fa"]
