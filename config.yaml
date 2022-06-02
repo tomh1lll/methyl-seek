@@ -1,5 +1,5 @@
 samples: "/data/NHLBI_IDSS/projects/methyl-seek/samples.txt"
-rawdata_dir: "/data/NHLBI_IDSS/projects/methyl-seek/fastq"
+rawdata_dir: "/data/NHLBI_IDSS/rawdata/methyl-seek/fastq"
 result_dir: "/data/NHLBI_IDSS/projects/methyl-seek"
 hg38_fa: "/data/NHLBI_IDSS/references/Bismark_Genomes/hg38/genome.fa"
 hg38_gtf: "/fdb/igenomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.gtf"
