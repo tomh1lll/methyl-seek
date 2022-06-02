@@ -31,10 +31,10 @@ The pipeline performs quality control steps and maps the data using Bismark, bef
 
 #### Dry run of the pipeline
 
-To perform a dry run a step of the pipeline, giving the pipeline the working directory where results will be stored, and submit:
+To perform a dry run a step of the pipeline, giving 3 arguments, if it is a dry-run (npr) or full run (process), the directory containing all the samples you want to process, and the output working directory where results will be stored, and submit:
 
 ```
-sh pipeline_submit.sh npr /data/NHLBIcore/projects/methyl-seek
+sh pipeline_submit.sh npr /data/NHLBIcore/rawdata/methyl-seek /data/NHLBIcore/projects/methyl-seek
 ```
 
 #### Actual run of the pipeline
@@ -42,5 +42,5 @@ sh pipeline_submit.sh npr /data/NHLBIcore/projects/methyl-seek
 Once everything seems to work, to perform a full run of a step of the pipeline, submit:
 
 ```
-sbatch --partition=norm --gres=lscratch:500 --time=10-00:00:00 --mail-type=BEGIN,END,FAIL pipeline_submit.sh process /data/NHLBIcore/projects/methyl-seek
+sbatch --partition=norm --gres=lscratch:500 --time=10-00:00:00 --mail-type=BEGIN,END,FAIL pipeline_submit.sh process /data/NHLBIcore/rawdata/methyl-seek /data/NHLBIcore/projects/methyl-seek
 ```
