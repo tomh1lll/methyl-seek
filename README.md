@@ -1,22 +1,25 @@
 
-#### Setting up the working environment
-
-Before running the pipeline, certain packages are required to be installed within a custom conda environment.
-
-```
-module load python
-source /data/$USER/conda/etc/profile.d/conda.sh
-conda create --name meth
-conda activate meth
-mamba install -yc bioconda bwameth methyldackel
-conda deactivate meth
-```
 
 #### Setting up the working files
 
-Alter the config.yaml so the rawdata_dir is the absolute path of the directory containing all your fastqs.
-Alter the result_dir so it is the absolute path of the working directory containing your snakemake pipeline, where results will be stored.
-Alter samples in config.yaml to be the absolute path of your samples.txt. Check this is correct. The samples file should have a list of all sample IDs, one per line, as follows:
+During the submission process, you provide the script with the directories where rawdata is stored & where the output will be stored. First make sure that these two directories exist & that the raw data directory contains all the fastqs of samples that would you to process. The fastqs need to be paired-end and named in the following format.
+
+```
+S1.R1.fastq.gz
+S1.R2.fastq.gz
+S2.R1.fastq.gz
+S2.R2.fastq.gz
+S3.R1.fastq.gz
+S3.R2.fastq.gz
+S4.R1.fastq.gz
+S4.R2.fastq.gz
+S5.R1.fastq.gz
+S5.R2.fastq.gz
+S6.R1.fastq.gz
+S6.R2.fastq.gz
+```
+
+where S1-6 are arbitrarily chosen example sample names. The samples matching this name scheme in the rawdata directory will generate a sample file with the following names in the output directory:
 
 ```
 S1
