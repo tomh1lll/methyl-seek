@@ -112,8 +112,8 @@ rule All:
       expand(join(working_dir, "bismarkAlign/{samples}.star.duplic"), samples=SAMPLES),
       #expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),samples=SAMPLES),
 
-      # extract CpG profile with methyldackel
-      expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),samples=SAMPLES),
+      # extract CpG profile with bismark
+      expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),samples=SAMPLES),
 
       # generate multiqc output
       "multiqc_report.html",
@@ -366,7 +366,7 @@ rule bismark_extract:
   input:
     bam=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),
   output:
-    cov=join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),
+    cov=join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),
   params:
     rname='pl:bismark_extract',
     bismark_index=join(bisulphite_genome_path,species),
@@ -570,7 +570,7 @@ rule multiqc:
 ############### Deconvolution rules begin here
 rule get_CpG:
   input:
-    join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),
+    join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),
   output:
     join(working_dir, "CpG_CSV/{samples}.csv"),
   params:
