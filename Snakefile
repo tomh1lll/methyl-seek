@@ -80,14 +80,14 @@ rule All:
       expand(join(working_dir, "kraken","{samples}.trim.kraken_bacteria.krona.html"),samples=SAMPLES),
 
       #FQscreen output
-      expand(join(working_dir,"FQscreen","{samples}.R1.trim_screen.txt"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen","{samples}.R1.trim_screen.png"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen","{samples}.R2.trim_screen.txt"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen","{samples}.R2.trim_screen.png"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen2","{samples}.R1.trim_screen.txt"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen2","{samples}.R1.trim_screen.png"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen2","{samples}.R2.trim_screen.txt"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen2","{samples}.R2.trim_screen.png"), samples=SAMPLES),
+      expand(join(working_dir,"FQscreen","{samples}_val_1_screen.txt"),samples=SAMPLES),
+      expand(join(working_dir,"FQscreen","{samples}_val_1_screen.png"),samples=SAMPLES),
+      expand(join(working_dir,"FQscreen","{samples}_val_2_screen.txt"),samples=SAMPLES),
+      expand(join(working_dir,"FQscreen","{samples}_val_2_screen.png"),samples=SAMPLES),
+      expand(join(working_dir,"FQscreen2","{samples}_val_1_screen.txt"),samples=SAMPLES),
+      expand(join(working_dir,"FQscreen2","{samples}_val_1_screen.png"),samples=SAMPLES),
+      expand(join(working_dir,"FQscreen2","{samples}_val_2_screen.txt"),samples=SAMPLES),
+      expand(join(working_dir,"FQscreen2","{samples}_val_2_screen.png"), samples=SAMPLES),
 
       # bisulphite genome preparation
       join(bisulphite_genome_path, species, "Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa"),
@@ -110,7 +110,6 @@ rule All:
       expand(join(working_dir, "preseq/{samples}.ccurve"),samples=SAMPLES),
       expand(join(working_dir, "trimGalore/{samples}_insert_sizes.txt"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.star.duplic"), samples=SAMPLES),
-      #expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.coverage.txt"),samples=SAMPLES),
 
       # extract CpG profile with bismark
       expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),samples=SAMPLES),
@@ -206,7 +205,7 @@ rule bbmerge:
 
       module load bbtools/38.87
       bbtools bbmerge-auto in1={input.R1} in2={input.R2} qin=${{encoding}} \
-      ihist={output} k=62 extend2=200 rem ecct -Xmx128G
+      ihist={output} k=62 extend2=200 rem ecct -Xmx150G
           """
 
 rule fastq_screen:
@@ -214,14 +213,14 @@ rule fastq_screen:
       file1=join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),
       file2=join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),
     output:
-      out1=join(working_dir,"FQscreen","{samples}.R1.trim_screen.txt"),
-      out2=join(working_dir,"FQscreen","{samples}.R1.trim_screen.png"),
-      out3=join(working_dir,"FQscreen","{samples}.R2.trim_screen.txt"),
-      out4=join(working_dir,"FQscreen","{samples}.R2.trim_screen.png"),
-      out5=join(working_dir,"FQscreen2","{samples}.R1.trim_screen.txt"),
-      out6=join(working_dir,"FQscreen2","{samples}.R1.trim_screen.png"),
-      out7=join(working_dir,"FQscreen2","{samples}.R2.trim_screen.txt"),
-      out8=join(working_dir,"FQscreen2","{samples}.R2.trim_screen.png")
+      out1=join(working_dir,"FQscreen","{samples}_val_1_screen.txt"),
+      out2=join(working_dir,"FQscreen","{samples}_val_1_screen.png"),
+      out3=join(working_dir,"FQscreen","{samples}_val_2_screen.txt"),
+      out4=join(working_dir,"FQscreen","{samples}_val_2_screen.png"),
+      out5=join(working_dir,"FQscreen2","{samples}_val_1_screen.txt"),
+      out6=join(working_dir,"FQscreen2","{samples}_val_1_screen.png"),
+      out7=join(working_dir,"FQscreen2","{samples}_val_2_screen.txt"),
+      out8=join(working_dir,"FQscreen2","{samples}_val_2_screen.png")
     params:
       rname='pl:fqscreen',
       outdir = join(working_dir,"FQscreen"),
@@ -253,7 +252,7 @@ rule kraken_pe:
     params:
         rname='pl:kraken',
         dir=join(working_dir,"kraken"),
-        bacdb="/fdb/kraken/20170202_bacteria",
+        bacdb="/fdb/kraken/20210223_standard_kraken2",
         prefix="{samples}",
     threads: 24
     shell:
