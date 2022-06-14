@@ -206,7 +206,7 @@ rule bbmerge:
 
       module load bbtools/38.87
       bbtools bbmerge-auto in1={input.R1} in2={input.R2} qin=${{encoding}} \
-      ihist={output} k=62 extend2=200 rem ecct -Xmx64G
+      ihist={output} k=62 extend2=200 rem ecct -Xmx128G
           """
 
 rule fastq_screen:
