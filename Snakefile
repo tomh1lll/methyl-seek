@@ -553,6 +553,7 @@ rule multiqc:
   output:
     "multiqc_report.html",
   params:
+    rname='pl:multiqc',
     dir=working_dir,
     bis_dir=directory(join(working_dir,"bismarkAlign")),
     script_dir=join(working_dir,"scripts"),
