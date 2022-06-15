@@ -594,8 +594,7 @@ rule get_overlap_meth:
   params:
     rname="get_overlap_meth",
     map_table=CpG_MAP_TABLE,
-  shell:
-    """
+  run:
     df_ref=pd.read_csv(params.map_table,sep='\t',header=None)
     df_ref.columns=['chromosome','start','end','cgid']
     df_ref=df_ref.loc[(df_ref['chromosome'].isin(CHRS)),]
@@ -604,7 +603,6 @@ rule get_overlap_meth:
     dfm=dfm.drop(labels=['chromosome','start','end'],axis=1)
     dfm=dfm.set_index('cgid')
     dfm.to_csv(output[0])
-    """
 
 rule run_deconv:
   input:
