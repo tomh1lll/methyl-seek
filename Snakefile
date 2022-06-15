@@ -627,6 +627,8 @@ rule merge_tables:
     expand(join(working_dir, "deconvolution_CSV/{samples}.csv"),samples=SAMPLES),
   output:
     join(working_dir, "deconvolution_CSV/total.csv"),
+  params:
+    rname="merge_tables",
   run:
     dfm=pd.read_csv(input[0])
     for f in input[1:]:
@@ -644,6 +646,7 @@ rule run_deconv_merged:
     ref=REF_ATLAS,
     dir=join(working_dir,"deconvolution_CSV"),
     script_dir=join(working_dir,"scripts"),
+    rname="run_deconv_merged",
   shell:
     """
     module load python
