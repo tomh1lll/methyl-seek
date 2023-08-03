@@ -37,6 +37,10 @@ phage_ref: "/data/NHLBI_IDSS/references/Bismark_Genomes/phage"
 species: "hg38"
 REF_ATLAS: "/data/NHLBI_IDSS/references/MethylCpG_deconvolution/resources/reference_atlas.csv"
 CpG_MAP_TABLE: "/data/NHLBI_IDSS/references/MethylCpG_deconvolution/resources/reference_atlas.hg38.unique.bed"
+REF_MARKERS: "/data/NHLBI_IDSS/projects/NHLBI-4/cfDNAme_data/Atlas.MethylMatrix.markers_22cov.tsv"
+REF_IDS: "/data/NHLBI_IDSS/projects/NHLBI-4/cfDNAme_data/reference_methylomes.20230803.tsv"
+GOLD_MARKERS: "/data/NHLBI_IDSS/projects/NHLBI-4/cfDNAme_data/golden_markers.22.bed"
+HG38TOHG19: "/data/NHLBI_IDSS/projects/NHLBI-4/cfDNAme_data/hg38ToHg19.over.chain.gz"
 
 EOF
 
