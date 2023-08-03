@@ -605,10 +605,11 @@ rule format4:
     tsv=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),
   params:
     rname="pl:format4",
+    script_dir=join(working_dir,"scripts"),
   shell:
     """
     module load R
-    Rscript scripts/tissues_of_origin/aggregate_over_regions.R {input.sort} {output.tsv}
+    Rscript {params.script_dir}/aggregate_over_regions.R {input.sort} {output.tsv}
     """
 
 rule cfDNAme:
@@ -626,11 +627,11 @@ rule cfDNAme:
     """
     module load R
     Rscript ${params.script_dir}/tissues_of_origin_v2.R \
-    ${input.bed}  \
-    ${params.reference_markers} \
-    ${output.tsv} \
-    ${params.reference_IDs} \
-    ${params.sampleName} \
+    {input.bed}  \
+    {params.reference_markers} \
+    {output.tsv} \
+    {params.reference_IDs} \
+    {params.sampleName} \
     TRUE \
     FALSE \
     TRUE \
