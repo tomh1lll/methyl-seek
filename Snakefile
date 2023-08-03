@@ -38,7 +38,10 @@ species= config["species"]
 
 REF_ATLAS=config["REF_ATLAS"]
 CpG_MAP_TABLE=config["CpG_MAP_TABLE"]
-
+REF_MARKERS=config["REF_MARKERS"]
+REF_IDS=config["REF_IDS"]
+GOLD_MARKERS=config["GOLD_MARKERS"]
+HG38TOHG19=config["HG38TOHG19"]
 
 ## The file requires these headings as they are used in multiple rules later on.
 
@@ -107,6 +110,7 @@ rule All:
       expand(join(working_dir, "deconvolution_CSV/{samples}.csv"),samples=SAMPLES),
       expand(join(working_dir, "deconvolution_CSV/{samples}_deconv.log"),samples=SAMPLES),
       expand(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),samples=SAMPLES),
+      expand(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeDeconvolution.tsv"),samples=SAMPLES),
       join(working_dir, "deconvolution_CSV/total.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_output.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_plot.png"),
@@ -605,4 +609,30 @@ rule format4:
     """
     module load R
     Rscript scripts/tissues_of_origin/aggregate_over_regions.R {input.sort} {output.tsv}
+    """
+
+rule cfDNAme:
+  input:
+    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),
+  output:
+    tsv=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeDeconvolution.tsv"),
+  params:
+    rname="pl:cfDNAme",
+    script_dir=join(working_dir,"scripts"),
+    sampleName="{samples}",
+    reference_markers=REF_MARKERS,
+    reference_IDs=REF_IDS,
+  shell:
+    """
+    module load R
+    Rscript ${params.script_dir}/tissues_of_origin_v2.R \
+    ${input.bed}  \
+    ${params.reference_markers} \
+    ${output.tsv} \
+    ${params.reference_IDs} \
+    ${params.sampleName} \
+    TRUE \
+    FALSE \
+    TRUE \
+    colon_5/hsc_5/hsc_2/skin_1/skin_2/spleen_1/spleen_2/spleen_3/spleen_4/
     """
