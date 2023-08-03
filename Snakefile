@@ -74,21 +74,6 @@ rule All:
       expand(join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),samples=SAMPLES),
       expand(join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),samples=SAMPLES),
 
-      # kraken output
-      expand(join(working_dir, "kraken","{samples}.trim.kraken_bacteria.out.txt"),samples=SAMPLES),
-      expand(join(working_dir, "kraken","{samples}.trim.kraken_bacteria.taxa.txt"),samples=SAMPLES),
-      expand(join(working_dir, "kraken","{samples}.trim.kraken_bacteria.krona.html"),samples=SAMPLES),
-
-      #FQscreen output
-      expand(join(working_dir,"FQscreen","{samples}_val_1_screen.txt"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen","{samples}_val_1_screen.png"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen","{samples}_val_2_screen.txt"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen","{samples}_val_2_screen.png"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen2","{samples}_val_1_screen.txt"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen2","{samples}_val_1_screen.png"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen2","{samples}_val_2_screen.txt"),samples=SAMPLES),
-      expand(join(working_dir,"FQscreen2","{samples}_val_2_screen.png"), samples=SAMPLES),
-
       # bisulphite genome preparation
       join(bisulphite_genome_path, species, "Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa"),
       join(bisulphite_genome_path, species, "Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"),
@@ -108,7 +93,6 @@ rule All:
       expand(join(working_dir, "QualiMap/{samples}/qualimapReport.html"),samples=SAMPLES),
       expand(join(working_dir, "QualiMap/{samples}/genome_results.txt"),samples=SAMPLES),
       expand(join(working_dir, "preseq/{samples}.ccurve"),samples=SAMPLES),
-      expand(join(working_dir, "trimGalore/{samples}_insert_sizes.txt"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.star.duplic"), samples=SAMPLES),
 
       # extract CpG profile with bismark
@@ -184,98 +168,6 @@ rule trimGalore:
       module load fastqc/0.11.9
       mkdir -p {params.dir}
       trim_galore --paired --cores {threads} {params.command} --basename {params.tag} --output_dir {params.dir} --fastqc_args "--outdir {params.fastqcdir}"  {input.F1} {input.F2}
-      """
-
-################## New edition - started
-rule bbmerge:
-    input:
-      R1=join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),
-      R2=join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),
-    output:
-      join(working_dir, "trimGalore/{samples}_insert_sizes.txt"),
-    params:
-      rname='pl:bbmerge',
-      script_dir=join(working_dir,"scripts"),
-    threads: 4
-    shell: """
-      # Get encoding of Phred Quality Scores
-      module load python
-      encoding=$(python {params.script_dir}/phred_encoding.py {input.R1})
-      echo "Detected Phred+${{encoding}} ASCII encoding"
-
-      module load bbtools/38.87
-      bbtools bbmerge-auto in1={input.R1} in2={input.R2} qin=${{encoding}} \
-      ihist={output} k=62 extend2=200 rem ecct -Xmx150G
-          """
-
-rule fastq_screen:
-    input:
-      file1=join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),
-      file2=join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),
-    output:
-      out1=join(working_dir,"FQscreen","{samples}_val_1_screen.txt"),
-      out2=join(working_dir,"FQscreen","{samples}_val_1_screen.png"),
-      out3=join(working_dir,"FQscreen","{samples}_val_2_screen.txt"),
-      out4=join(working_dir,"FQscreen","{samples}_val_2_screen.png"),
-      out5=join(working_dir,"FQscreen2","{samples}_val_1_screen.txt"),
-      out6=join(working_dir,"FQscreen2","{samples}_val_1_screen.png"),
-      out7=join(working_dir,"FQscreen2","{samples}_val_2_screen.txt"),
-      out8=join(working_dir,"FQscreen2","{samples}_val_2_screen.png")
-    params:
-      rname='pl:fqscreen',
-      outdir = join(working_dir,"FQscreen"),
-      outdir2 = join(working_dir,"FQscreen2"),
-      fastq_screen_config="/data/CCBR_Pipeliner/db/PipeDB/lib/fastq_screen.conf",
-      fastq_screen_config2="/data/CCBR_Pipeliner/db/PipeDB/lib/fastq_screen_2.conf",
-    threads: 24
-    shell:
-      """
-      module load fastq_screen/0.14.1
-      module load bowtie/2-2.3.4
-      module load perl/5.24.3
-      fastq_screen --conf {params.fastq_screen_config} --outdir {params.outdir} \
-        --threads {threads} --subset 1000000 \
-        --aligner bowtie2 --force {input.file1} {input.file2}
-      fastq_screen --conf {params.fastq_screen_config2} --outdir {params.outdir2} \
-        --threads {threads} --subset 1000000 \
-        --aligner bowtie2 --force {input.file1} {input.file2}
-      """
-
-rule kraken_pe:
-    input:
-        fq1=join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),
-        fq2=join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),
-    output:
-        krakenout = join(working_dir, "kraken","{samples}.trim.kraken_bacteria.out.txt"),
-        krakentaxa = join(working_dir, "kraken","{samples}.trim.kraken_bacteria.taxa.txt"),
-        kronahtml = join(working_dir, "kraken","{samples}.trim.kraken_bacteria.krona.html"),
-    params:
-        rname='pl:kraken',
-        dir=join(working_dir,"kraken"),
-        bacdb="/fdb/kraken/20210223_standard_kraken2",
-        prefix="{samples}",
-    threads: 24
-    shell:
-      """
-      module load kraken
-      module load kronatools/2.7
-      mkdir -p {params.dir}
-      cd /lscratch/$SLURM_JOBID;
-      cp -rv {params.bacdb} /lscratch/$SLURM_JOBID/;
-
-      kdb_base=$(basename {params.bacdb})
-      kraken2 --db /lscratch/$SLURM_JOBID/${{kdb_base}} \
-        --threads {threads} --report {output.krakentaxa} \
-        --output {output.krakenout} \
-        --gzip-compressed \
-        --paired {input.fq1} {input.fq2}
-      # Generate Krona Report
-      cut -f2,3 {output.krakenout} | ktImportTaxonomy - -o {output.kronahtml}
-      
-      #kdb_base=$(basename {params.bacdb})
-      #kraken --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` --fastq-input --gzip-compressed --threads {threads} --output /lscratch/$SLURM_JOBID/{params.prefix}.krakenout --preload--paired {input.fq1} {input.fq2}
-      #kraken-translate --mpa-format --db /lscratch/$SLURM_JOBID/`echo {params.bacdb}|awk -F "/" '{{print \$NF}}'` /lscratch/$SLURM_JOBID/{params.prefix}.krakenout |cut -f2|sort|uniq -c|sort -k1,1nr > /lscratch/$SLURM_JOBID/{params.prefix}.krakentaxa
-      #cut -f 2,3 /lscratch/$SLURM_JOBID/{params.prefix}.krakenout | ktImportTaxonomy - -o /lscratch/$SLURM_JOBID/{params.prefix}.kronahtml
       """
 
 ################## New edition - ended
