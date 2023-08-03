@@ -97,6 +97,7 @@ rule All:
 
       # extract CpG profile with bismark
       expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),samples=SAMPLES),
+      expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.crambedGraph.gz"),samples=SAMPLES),
 
       # generate multiqc output
       "multiqc_report.html",
@@ -105,6 +106,7 @@ rule All:
       expand(join(working_dir, "CpG_CSV/{samples}.csv"),samples=SAMPLES),
       expand(join(working_dir, "deconvolution_CSV/{samples}.csv"),samples=SAMPLES),
       expand(join(working_dir, "deconvolution_CSV/{samples}_deconv.log"),samples=SAMPLES),
+      expand(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),samples=SAMPLES),
       join(working_dir, "deconvolution_CSV/total.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_output.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_plot.png"),
@@ -258,6 +260,7 @@ rule bismark_extract:
     bam=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),
   output:
     cov=join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),
+    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.crambedGraph.gz"),
   params:
     rname='pl:bismark_extract',
     bismark_index=join(bisulphite_genome_path,species),
@@ -544,4 +547,62 @@ rule run_deconv_merged:
     module load python
     cd {params.dir}
     python {params.script_dir}/deconvolve.py --atlas_path {params.ref} --plot --residuals {input}
+    """
+
+
+
+###############CFDNAME RULES######################
+
+rule format1:
+  input:
+    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.crambedGraph.gz"),
+  output:
+    bed=temp(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.mapped_autosomal_CpG.bedGraph.tmp")),
+  params:
+    rname="pl:format1",
+  shell:
+    """
+    module load bedtools
+    zcat {input.bed} | tail -n +2 | bedtools sort -i - > {output.bed}
+    """
+
+rule format2:
+  input:
+    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.mapped_autosomal_CpG.bedGraph.tmp"),
+  output:
+    graph=temp(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.liftover.bedGraph.tmp")),
+  params:
+    rname="pl:format2",
+    lift_file=HG38TOHG19,
+  shell:
+    """
+    module load bedtools crossmap
+    crossmap bed {params.lift_file} {input.bed} {output.graph}
+    """
+
+rule format3:
+  input:
+    graph=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.liftover.bedGraph.tmp"),
+  output:
+    sort=temp(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.sorted.bedGraph")),
+  params:
+    rname="pl:format3",
+    markers=GOLD_MARKERS,
+  shell:
+    """
+    module load bedtools
+    bedtools sort -i {input.graph} | bedtools intersect -wo -a {params.markers} -b stdin -sorted | awk '$6-$5==1 {print $0}' | awk 'NF{NF-=1};1' > {output.sort}
+    """
+
+rule format4:
+  input:
+    sort=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.sorted.bedGraph"),
+  output:
+    tsv=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),
+  params:
+    rname="pl:format4",
+  shell:
+    """
+    module load R
+    Rscript scripts/tissues_of_origin/aggregate_over_regions.R {input.sort} {output.tsv}
     """
