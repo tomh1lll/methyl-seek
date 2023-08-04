@@ -73,16 +73,11 @@ rule All:
       # Checking data quality:
       expand(join(working_dir, "rawQC/{samples}.{rn}_fastqc.html"), samples=SAMPLES, rn=RN),
 
-      # Quality trimming output:
-      expand(join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),samples=SAMPLES),
-      expand(join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),samples=SAMPLES),
-
       # bisulphite genome preparation
       join(bisulphite_genome_path, species, "Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa"),
       join(bisulphite_genome_path, species, "Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"),
 
       # bismark align to human reference genomes
-      expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.bam"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.cram"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.flagstat"),samples=SAMPLES),
       expand(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.flagstat"),samples=SAMPLES),
@@ -157,8 +152,8 @@ rule trimGalore:
       F1=join(working_dir, "raw/{samples}.R1.fastq.gz"),
       F2=join(working_dir, "raw/{samples}.R2.fastq.gz"),
     output:
-      join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),
-      join(working_dir, "trimGalore/{samples}_val_2.fq.gz")
+      temp(join(working_dir, "trimGalore/{samples}_val_1.fq.gz")),
+      temp(join(working_dir, "trimGalore/{samples}_val_2.fq.gz")),
     params:
       rname="trimGalore",
       dir=directory(join(working_dir, "trimGalore")),
@@ -206,7 +201,7 @@ rule bismark_align:
       F1=join(working_dir, "trimGalore/{samples}_val_1.fq.gz"),
       F2=join(working_dir, "trimGalore/{samples}_val_2.fq.gz"),
     output:
-      B1=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.bam"),
+      B1=temp(join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.bam")),
       B2=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.flagstat"),
       FQ1=temp(join(working_dir, "bismarkAlign/{samples}_val_1.fq.gz_unmapped_reads_1.fq.gz")),
       FQ2=temp(join(working_dir, "bismarkAlign/{samples}_val_2.fq.gz_unmapped_reads_2.fq.gz")),
@@ -265,6 +260,12 @@ rule bismark_extract:
   output:
     cov=join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),
     bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.crambedGraph.gz"),
+    CHGOB=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CHG_OB_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
+    CHGOT=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CHG_OT_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
+    CHHOB=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CHH_OB_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
+    CHHOT=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CHH_OT_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
+    CPGOB=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CpG_OB_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
+    CPGOT=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CpG_OT_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
   params:
     rname='pl:bismark_extract',
     bismark_index=join(bisulphite_genome_path,species),
