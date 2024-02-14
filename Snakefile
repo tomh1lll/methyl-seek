@@ -95,7 +95,7 @@ rule All:
 
       # extract CpG profile with bismark
       expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),samples=SAMPLES),
-      expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.crambedGraph.gz"),samples=SAMPLES),
+      expand(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.bedGraph.gz"),samples=SAMPLES),
 
       # generate multiqc output
       "multiqc_report.html",
@@ -259,7 +259,7 @@ rule bismark_extract:
     bam=join(working_dir, "bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),
   output:
     cov=join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.CpG_report.txt.gz"),
-    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.crambedGraph.gz"),
+    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.bedGraph.gz"),
     CHGOB=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CHG_OB_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
     CHGOT=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CHG_OT_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
     CHHOB=temp(join(working_dir, "CpG/{samples}.bismark_bt2_pe.deduplicated/CHH_OB_{samples}.bismark_bt2_pe.deduplicated.txt.gz")),
@@ -560,7 +560,7 @@ rule run_deconv_merged:
 
 rule format1:
   input:
-    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.crambedGraph.gz"),
+    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.bismark_bt2_pe.deduplicated.bedGraph.gz"),
   output:
     bed=temp(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.mapped_autosomal_CpG.bedGraph.tmp")),
   params:
