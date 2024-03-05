@@ -126,4 +126,13 @@
       "manhatten": {
               "mem": "30g",
       },
+      "sorting_CpG_bedgraph": {
+              "mem": "32g",
+      },
+      "liftover_bedgraph": {
+              "mem": "32g",
+      },
+      "extract_signature_beds": {
+              "mem": "32g",
+      },
 }
