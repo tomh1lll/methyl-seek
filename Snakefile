@@ -564,7 +564,7 @@ rule sorting_CpG_bedgraph:
   output:
     bed=temp(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.mapped_autosomal_CpG.bedGraph.tmp")),
   params:
-    rname="pl:format1",
+    rname="pl:sorting_CpG_bedgraph",
   shell:
     """
     module load bedtools
@@ -577,7 +577,7 @@ rule liftover_bedgraph:
   output:
     graph=temp(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.liftover.bedGraph.tmp")),
   params:
-    rname="pl:format2",
+    rname="pl:liftover_bedgraph",
     lift_file=HG38TOHG19,
   shell:
     """
@@ -591,7 +591,7 @@ rule extract_signature_beds:
   output:
     sort=temp(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.sorted.bedGraph")),
   params:
-    rname="pl:format3",
+    rname="pl:extract_signature_beds",
     markers=GOLD_MARKERS,
   shell:
     """
@@ -605,7 +605,7 @@ rule aggregate_over_regions:
   output:
     tsv=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),
   params:
-    rname="pl:format4",
+    rname="pl:aggregate_over_regions",
     script_dir=join(working_dir,"scripts"),
   shell:
     """
