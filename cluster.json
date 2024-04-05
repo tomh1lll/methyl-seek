@@ -135,4 +135,14 @@
       "extract_signature_beds": {
               "mem": "32g",
       },
+      "bamSort": {
+              "mem": "32g",
+              "threads": "12",
+              "time": "24:00:00",
+      },
+      "wgbstools": {
+              "mem": "32g",
+              "threads": "12",
+              "time": "24:00:00",
+      },
 }
