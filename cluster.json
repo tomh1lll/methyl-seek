@@ -135,7 +135,7 @@
       "extract_signature_beds": {
               "mem": "32g",
       },
-      "bamSort": {
+      "bamsort": {
               "mem": "32g",
               "threads": "12",
               "time": "24:00:00",
