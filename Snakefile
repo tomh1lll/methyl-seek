@@ -109,6 +109,8 @@ rule All:
       join(working_dir, "deconvolution_CSV/total.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_output.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_plot.png"),
+      join(working_dir,"UXM/UXM_deconv.250.csv"),
+      pat=expand(join(working_dir,"UXM/{samples}.pat.gz"),samples=SAMPLES),
 
 
 ## Copy raw data to working directory
@@ -637,4 +639,52 @@ rule cfDNAme:
     FALSE \
     TRUE \
     colon_5/hsc_5/hsc_2/spleen_1/spleen_2/spleen_3/spleen_4/
+    """
+
+rule bamsort:
+  input:
+    bam=join(working_dir,"bismarkAlign/{samples}.bismark_bt2_pe.deduplicated.bam"),
+  output:
+    bam=temp(join(working_dir,"bismarkAlign/{samples}.bam")),
+    bai=temp(join(working_dir,"bismarkAlign/{samples}.bam.bai")),
+  params:
+    rname="pl:bamsort",
+    reference="/data/NHLBI_IDSS/references/Bismark_Genomes/hg38/genome.fa",
+  shell:
+    """
+    module load samtools 
+    samtools sort -@ 12 --reference /data/NHLBI_IDSS/references/Bismark_Genomes/hg38/genome.fa {input.bam} > {output.bam}
+    samtools index -@ 12 {output.bam}
+    """
+
+rule wgbstools:
+  input:
+    bam=join(working_dir,"bismarkAlign/{samples}.bam"),
+    bai=temp(join(working_dir,"bismarkAlign/{samples}.bam.bai")),
+  output:
+    pat=join(working_dir,"UXM/{samples}.pat.gz"),
+  params:
+    rname="pl:wgbstools",
+    ref=species,
+    outdir=join(working_dir,"UXM"),
+  shell:
+    """
+    export PATH=${PATH}:/data/NHLBI_IDSS/references/UXM
+    module load samtools bedtools bamtools
+    wgbstools bam2pat --genome {params.ref} --out_dir {params.outdir} -@ 12 {input.bam}
+    """
+
+rule UXM:
+  input:
+    pat=expand(join(working_dir,"UXM/{samples}.pat.gz"),samples=SAMPLES),
+  output:
+    pat=join(working_dir,"UXM/UXM_deconv.250.csv"),
+  params:
+    rname="pl:UXM",
+    atlas="/data/NHLBI_IDSS/references/UXM/supplemental/Atlas.U250.l4.hg38.full.tsv",
+  shell:
+    """
+    export PATH=${{PATH}}:/data/NHLBI_IDSS/references/UXM
+    module load samtools bedtools bamtools
+    uxm deconv {input.pat} -o {output.pat} --atlas {params.atlas} --ignore Colon-Fibro Dermal-Fibro Gallbladder Bone-Osteob
     """
