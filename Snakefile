@@ -110,7 +110,8 @@ rule All:
       join(working_dir, "deconvolution_CSV/total_deconv_output.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_plot.png"),
       join(working_dir,"UXM/UXM_deconv.250.csv"),
-      pat=expand(join(working_dir,"UXM/{samples}.pat.gz"),samples=SAMPLES),
+      expand(join(working_dir,"UXM/{samples}.pat.gz"),samples=SAMPLES),
+      expand(join(working_dir,"UXM/{samples}_deconv.250.csv"),samples=SAMPLES),
 
 
 ## Copy raw data to working directory
