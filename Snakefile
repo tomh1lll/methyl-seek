@@ -676,11 +676,26 @@ rule wgbstools:
 
 rule UXM:
   input:
+    pat=join(working_dir,"UXM/{samples}.pat.gz"),
+  output:
+    pat=join(working_dir,"UXM/{samples}_deconv.250.csv"),
+  params:
+    rname="pl:UXM",
+    atlas="/data/NHLBI_IDSS/references/UXM/supplemental/Atlas.U250.l4.hg38.full.tsv",
+  shell:
+    """
+    export PATH=${{PATH}}:/data/NHLBI_IDSS/references/UXM
+    module load samtools bedtools bamtools
+    uxm deconv {input.pat} -o {output.pat} --atlas {params.atlas} --ignore Colon-Fibro Dermal-Fibro Gallbladder Bone-Osteob
+    """
+
+rule UXM_all:
+  input:
     pat=expand(join(working_dir,"UXM/{samples}.pat.gz"),samples=SAMPLES),
   output:
     pat=join(working_dir,"UXM/UXM_deconv.250.csv"),
   params:
-    rname="pl:UXM",
+    rname="pl:UXM_all",
     atlas="/data/NHLBI_IDSS/references/UXM/supplemental/Atlas.U250.l4.hg38.full.tsv",
   shell:
     """
