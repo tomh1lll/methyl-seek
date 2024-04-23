@@ -584,7 +584,7 @@ rule liftover_bedgraph:
     lift_file=HG38TOHG19,
   shell:
     """
-    module load bedtools crossmap/0.6.3
+    module load bedtools crossmap/0.6.5
     crossmap bed {params.lift_file} {input.bed} {output.graph}
     """
 
