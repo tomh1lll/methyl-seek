@@ -104,8 +104,8 @@ rule All:
       expand(join(working_dir, "CpG_CSV/{samples}.csv"),samples=SAMPLES),
       expand(join(working_dir, "deconvolution_CSV/{samples}.csv"),samples=SAMPLES),
       expand(join(working_dir, "deconvolution_CSV/{samples}_deconv.log"),samples=SAMPLES),
-      expand(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),samples=SAMPLES),
-      expand(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeDeconvolution.tsv"),samples=SAMPLES),
+      expand(join(working_dir,"cfDNAme/{samples}.cfDNAmeInput.bedGraph"),samples=SAMPLES),
+      expand(join(working_dir,"cfDNAme/{samples}.cfDNAmeDeconvolution.tsv"),samples=SAMPLES),
       join(working_dir, "deconvolution_CSV/total.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_output.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_plot.png"),
@@ -592,21 +592,23 @@ rule extract_signature_beds:
   input:
     graph=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.liftover.bedGraph.tmp"),
   output:
-    sort=temp(join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.sorted.bedGraph")),
+    sort=temp(join(working_dir,"cfDNAme/{samples}.sorted.bedGraph")),
   params:
     rname="pl:extract_signature_beds",
     markers=GOLD_MARKERS,
+    outdir=join(working_dir,"cfDNAme"),
   shell:
     """
     module load bedtools
+    mkdir -p {params.outdir}
     bedtools sort -i {input.graph} | bedtools intersect -wo -a {params.markers} -b stdin -sorted | awk '$6-$5==1 {{print $0}}' | awk 'NF{{NF-=1}};1' > {output.sort}
     """
 
 rule aggregate_over_regions:
   input:
-    sort=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.sorted.bedGraph"),
+    sort=join(working_dir,"cfDNAme/{samples}.sorted.bedGraph"),
   output:
-    tsv=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),
+    tsv=join(working_dir,"cfDNAme/{samples}.cfDNAmeInput.bedGraph"),
   params:
     rname="pl:aggregate_over_regions",
     script_dir=join(working_dir,"scripts"),
@@ -618,9 +620,9 @@ rule aggregate_over_regions:
 
 rule cfDNAme:
   input:
-    bed=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeInput.bedGraph"),
+    bed=join(working_dir,"cfDNAme/{samples}.cfDNAmeInput.bedGraph"),
   output:
-    tsv=join(working_dir,"CpG/{samples}.bismark_bt2_pe.deduplicated/{samples}.cfDNAmeDeconvolution.tsv"),
+    tsv=join(working_dir,"cfDNAme/{samples}.cfDNAmeDeconvolution.tsv"),
   params:
     rname="pl:cfDNAme",
     script_dir=join(working_dir,"scripts"),
