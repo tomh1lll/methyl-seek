@@ -668,11 +668,11 @@ rule wgbstools:
     rname="pl:wgbstools",
     ref=species,
     outdir=join(working_dir,"UXM"),
+    script_dir=join(working_dir,"scripts"),
   shell:
     """
-    export PATH=${PATH}:/data/NHLBI_IDSS/references/UXM
-    module load samtools bedtools bamtools
-    wgbstools bam2pat --genome {params.ref} --out_dir {params.outdir} -@ 12 {input.bam}
+    mkdir {params.outdir}
+    sh {params.script_dir}/bam2pat.sh ${input.bam} ${params.outdir}
     """
 
 rule UXM:
@@ -685,22 +685,7 @@ rule UXM:
     atlas="/data/NHLBI_IDSS/references/UXM/supplemental/Atlas.U250.l4.hg38.full.tsv",
   shell:
     """
-    export PATH=${{PATH}}:/data/NHLBI_IDSS/references/UXM
-    module load samtools bedtools bamtools
-    uxm deconv {input.pat} -o {output.pat} --atlas {params.atlas} --ignore Colon-Fibro Dermal-Fibro Gallbladder Bone-Osteob
+    sh {params.script_dir}/UXM.sh {output.pat} {input.pat} {params.atlas}
     """
 
-rule UXM_all:
-  input:
-    pat=expand(join(working_dir,"UXM/{samples}.pat.gz"),samples=SAMPLES),
-  output:
-    pat=join(working_dir,"UXM/UXM_deconv.250.csv"),
-  params:
-    rname="pl:UXM_all",
-    atlas="/data/NHLBI_IDSS/references/UXM/supplemental/Atlas.U250.l4.hg38.full.tsv",
-  shell:
-    """
-    export PATH=${{PATH}}:/data/NHLBI_IDSS/references/UXM
-    module load samtools bedtools bamtools
-    uxm deconv {input.pat} -o {output.pat} --atlas {params.atlas} --ignore Colon-Fibro Dermal-Fibro Gallbladder Bone-Osteob
-    """
+
