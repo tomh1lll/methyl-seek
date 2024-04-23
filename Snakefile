@@ -109,7 +109,6 @@ rule All:
       join(working_dir, "deconvolution_CSV/total.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_output.csv"),
       join(working_dir, "deconvolution_CSV/total_deconv_plot.png"),
-      join(working_dir,"UXM/UXM_deconv.250.csv"),
       expand(join(working_dir,"UXM/{samples}.pat.gz"),samples=SAMPLES),
       expand(join(working_dir,"UXM/{samples}_deconv.250.csv"),samples=SAMPLES),
 
@@ -663,7 +662,7 @@ rule bamsort:
 rule wgbstools:
   input:
     bam=join(working_dir,"bismarkAlign/{samples}.bam"),
-    bai=temp(join(working_dir,"bismarkAlign/{samples}.bam.bai")),
+    bai=join(working_dir,"bismarkAlign/{samples}.bam.bai"),
   output:
     pat=join(working_dir,"UXM/{samples}.pat.gz"),
   params:
@@ -674,7 +673,7 @@ rule wgbstools:
   shell:
     """
     mkdir {params.outdir}
-    sh {params.script_dir}/bam2pat.sh ${input.bam} ${params.outdir}
+    sh {params.script_dir}/bam2pat.sh {input.bam} {params.outdir}
     """
 
 rule UXM:
